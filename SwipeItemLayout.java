@@ -186,6 +186,7 @@
             @Override
             public int clampViewPositionHorizontal(View child, int left, int dx) {
     //            LogUtils.w("clampH : " + left + " , " + dx + " , " + child);
+                getParent().requestDisallowInterceptTouchEvent(true); // 不给外层布局上下滑动
                 View childAt1 = getChildAt(1);
                 // 滑动第一个view
                 if (child == getChildAt(0)) {
