@@ -14,7 +14,7 @@
 - 虽然这个`ItemLayout`可能是没有什么使用场景了。但是毕竟是一番心血。况且，里面对`padding`和`margin`都有很好的支持。对滑动边界的检测，对事件冲突的处理，对滑动释放的处理，个人感觉都处理的很完善。当然，一定是有不足之处的。不过就目前而言，里面的，我能想到的，需要处理的，都处理好了。
 
 - 这个`ItemLayout`算是对`ViewDragHelper`的一次实践吧。顺便吐槽一句：`ViewDragHelper`对边界处理是不算友好的。里面的边界处理计算值，我是打了好多`log`才慢慢找到规律，然后正确处理的。
-
+- add: 自己横向滑动时，不让父容器滑动。2017-05-07 22:07:55
 > 好吧。前言后语就这些了。
 > 顺便安利一个`log`库：[从Log切换到LogUtils](https://github.com/pengwei1024/LogUtils)。
 **这个`log`库满足你对`log`的所有幻想！**
@@ -210,6 +210,7 @@ public class SwipeItemLayout extends FrameLayout {
         @Override
         public int clampViewPositionHorizontal(View child, int left, int dx) {
 //            LogUtils.w("clampH : " + left + " , " + dx + " , " + child);
+            getParent().requestDisallowInterceptTouchEvent(true); // 不给外层布局上下滑动
             View childAt1 = getChildAt(1);
             // 滑动第一个view
             if (child == getChildAt(0)) {
