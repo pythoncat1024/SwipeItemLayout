@@ -43,11 +43,16 @@ public class SwipeLayout extends FrameLayout {
     private Point initSlide;
 
     @IntDef({SHOW_LEFT, SHOW_CENTER, SHOW_RIGHT})
-    @interface ShowStyle {
+    public @interface ShowStyle {
     }
 
     @ShowStyle
     private int showStyle;
+
+    @ShowStyle
+    public int getShowStyle() {
+        return showStyle;
+    }
 
     public SwipeLayout(@NonNull Context context) {
         this(context, null);
@@ -238,6 +243,7 @@ public class SwipeLayout extends FrameLayout {
         }
         return false;
     }
+
     /**
      * 是否是右边界
      *
@@ -257,8 +263,10 @@ public class SwipeLayout extends FrameLayout {
         }
         return false;
     }
+
     public void openLeft() {
         scrollTo(initSlide.x - getPaddingLeft() - leftParams.leftMargin, initSlide.y);
+        this.showStyle = SHOW_LEFT;
     }
 
     public void openRight() {
@@ -268,12 +276,14 @@ public class SwipeLayout extends FrameLayout {
                 + mWidth
                 + rightParams.leftMargin
                 + rightParams.rightMargin, initSlide.y);
+        this.showStyle = SHOW_RIGHT;
     }
 
     public void openCenter() {
         scrollTo(initSlide.x - getPaddingLeft() - leftParams.leftMargin
                         + getChildWidthWithMargin(leftMenu)
                 , initSlide.y);
+        this.showStyle = SHOW_CENTER;
     }
 
 
