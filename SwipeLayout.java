@@ -1,4 +1,4 @@
-```java
+
 package com.pythoncat.itemscroll.view;
 
 import android.content.Context;
@@ -264,4 +264,4 @@ public class SwipeLayout extends FrameLayout {
         return top + target.getMeasuredHeight();
     }
 }
-```
+
