@@ -10,7 +10,6 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
@@ -34,20 +33,17 @@ public class SwipeLayout extends FrameLayout {
     private static final int SHOW_CENTER = 1;
     private static final int SHOW_RIGHT = 2;
     private int downX;
-    private int downY;
     private int mWidth;
-    private int mHeight;
     private View leftMenu;
     private View centerView;
     private View rightMenu;
     private MarginLayoutParams centerParams;
     private MarginLayoutParams leftParams;
     private MarginLayoutParams rightParams;
-    private int touchSlop;
     private Point initSlide;
 
     @IntDef({SHOW_LEFT, SHOW_CENTER, SHOW_RIGHT})
-    public @interface ShowStyle {
+    @interface ShowStyle {
     }
 
     @ShowStyle
@@ -78,8 +74,6 @@ public class SwipeLayout extends FrameLayout {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         this.mWidth = w;
-        this.mHeight = h;
-        touchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         LogUtils.e("mw = " + mWidth);
         LogUtils.e("mwXXX = " + getPaddingLeft() + getPaddingRight() + getChildWidthWithMargin(centerView));
     }
@@ -210,24 +204,15 @@ public class SwipeLayout extends FrameLayout {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 downX = Math.round(event.getX());
-                downY = Math.round(event.getY());
                 break;
             case MotionEvent.ACTION_MOVE:
                 int moveX = Math.round(event.getX());
-                int moveY = Math.round(event.getY());
                 int dx = moveX - downX;
-                int dy = moveY - downY;
 
-                if (isLeftSlide(dx)) {
-                    // todo--> scrollTo(x,y)
-                } else if (isRightSlide(dx)) {
-                    // todo--> scrollTo(x,y)
-                } else {
+                if (!isLeftSlide(dx) && !isRightSlide(dx)) {
                     scrollBy(-dx, 0);
-
                 }
                 downX = Math.round(event.getX());
-                downY = Math.round(event.getY());
                 break;
             case MotionEvent.ACTION_UP:
                 break;
@@ -242,19 +227,17 @@ public class SwipeLayout extends FrameLayout {
      * @return true or false
      */
     private boolean isLeftSlide(int dx) {
-        // // TODO: 2017/5/10 -------------
         // showStyle = 0 ## Point(22, 0)
         // showStyle = 1 ## Point(-258, 0)
         // showStyle = 2 ## Point(-516, 0)
         // 258 ... 240
         LogUtils.e("" + getScrollX() + " .. " + (getScrollX() - dx));
         if (getScrollX() - dx < initSlide.x - getPaddingLeft() - leftParams.leftMargin) {
-            scrollTo(initSlide.x - getPaddingLeft() - leftParams.leftMargin, initSlide.y);
+            openLeft();
             return true;
         }
         return false;
     }
-
     /**
      * 是否是右边界
      *
@@ -262,37 +245,37 @@ public class SwipeLayout extends FrameLayout {
      * @return true or false
      */
     private boolean isRightSlide(int dx) {
-        // showStyle = 0 ## Point(22, 0)
-        // showStyle = 1 ## Point(-258, 0)
-        // showStyle = 2 ## Point(-516, 0)
-        // 258 ... 240
-        int rrr = initSlide.x - getPaddingLeft() - leftParams.leftMargin
-                - getChildWidthWithMargin(getChildAt(0))
-                - getChildWidthWithMargin(getChildAt(1))
-                - getChildWidthWithMargin(getChildAt(2));
-        int ppp = initSlide.x - getPaddingLeft() - leftParams.leftMargin
-                + getChildWidthWithMargin(getChildAt(0))
-                + getChildWidthWithMargin(getChildAt(1))
-                + getChildWidthWithMargin(getChildAt(2));
-        LogUtils.e("rrr --- " + rrr + " ## " + ppp);
-        LogUtils.e("xxx --- " + (getScrollX() - dx - ppp)
-                + " *** " + (getChildWidthWithMargin(getChildAt(0))
-                + getChildWidthWithMargin(getChildAt(2))));
 
-        // a> -b === > a<b
-
-        int rig = +initSlide.x
+        if (getScrollX() - dx > +initSlide.x
                 // initSlide.x 里面已经包含了对 child0的leftMargin的计算了
                 + leftParams.rightMargin
                 + mWidth
                 + rightParams.leftMargin
-                + rightParams.rightMargin;
-        if (getScrollX() - dx > rig) {
-            scrollTo(rig, initSlide.y);
+                + rightParams.rightMargin) {
+            openRight();
             return true;
         }
         return false;
     }
+    public void openLeft() {
+        scrollTo(initSlide.x - getPaddingLeft() - leftParams.leftMargin, initSlide.y);
+    }
+
+    public void openRight() {
+        scrollTo(+initSlide.x
+                // initSlide.x 里面已经包含了对 child0的leftMargin的计算了
+                + leftParams.rightMargin
+                + mWidth
+                + rightParams.leftMargin
+                + rightParams.rightMargin, initSlide.y);
+    }
+
+    public void openCenter() {
+        scrollTo(initSlide.x - getPaddingLeft() - leftParams.leftMargin
+                        + getChildWidthWithMargin(leftMenu)
+                , initSlide.y);
+    }
+
 
     // ###############----###################
     private MarginLayoutParams getChildLayoutParams(@NonNull View child) {
